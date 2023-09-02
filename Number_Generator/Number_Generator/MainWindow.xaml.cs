@@ -38,16 +38,18 @@ namespace Number_Generator
                 quantity = Convert.ToInt32(TBQuantity.Text);
             }
 
-            t = new Thread(() => RunAsync(TextBox1IsNumber, TBQuantityIsNumber, quantity));
+            
 
             // Если не указана нижняя граница, поток с стартует с 2.
             if (TextBox2.Text == "")
             {
-                outputTextBox.Text += "2 ";
+                num1 = 2;
+                outputTextBox.Text += "2  ";
                 quantity--;
             }
 
-
+            LabRange.Content = $"Диапазон: то {num1} до {num2}";
+            t = new Thread(() => RunAsync(TextBox1IsNumber, TBQuantityIsNumber, quantity, num1, num2));
             t.Start();
         }
 
@@ -55,7 +57,7 @@ namespace Number_Generator
 
         
 
-        public async void RunAsync(bool TextBox1IsNumber, bool TBQuantityIsNumber, int quantity)
+        public async void RunAsync(bool TextBox1IsNumber, bool TBQuantityIsNumber, int quantity, int min, int max)
         {
 
             try
@@ -64,12 +66,12 @@ namespace Number_Generator
                 await Dispatcher.InvokeAsync(async () =>
                 {
                     // Если не указана верхняя граница, генерирование происходит до завершения приложения. (Priority condition)
-                    if (!TextBox1IsNumber)
+                    if (!TextBox1IsNumber || !TBQuantityIsNumber)
                     {
                         for (int i = 0; i < quantity;)
                         {
 
-                            outputTextBox.Text += $"{random.Next(num1, num2 + 1)} ";
+                            outputTextBox.Text += $"{random.Next(min, max + 1)}  ";
                             await Task.Delay(500);
                         }
                     }
@@ -77,7 +79,7 @@ namespace Number_Generator
                     {
                         for (int i = 0; i < quantity; i++)
                         {
-                            outputTextBox.Text += $"{random.Next(num1, num2 + 1)} ";
+                            outputTextBox.Text += $"{random.Next(min, max + 1)}  ";
                         }
 
                         quantity = 0;
