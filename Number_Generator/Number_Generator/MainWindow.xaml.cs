@@ -10,7 +10,6 @@ namespace Number_Generator
     {
         int num1 = -2147483647, num2 = 2147483646;
         int quantity = 5;
-        bool UseQuantity = false;
         Random random = new Random();
         private Thread t = null;
         object locker = new Object();
@@ -22,7 +21,33 @@ namespace Number_Generator
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            t = new Thread(() => RunAsync());
+            bool TBQuantityIsNumber = Regex.IsMatch(TBQuantity.Text, @"^\d+$");
+            bool TextBox1IsNumber = Regex.IsMatch(TextBox1.Text, @"^-?\d+$");
+            bool TextBox2IsNumber = Regex.IsMatch(TextBox2.Text, @"^-?\d+$");
+
+            if (TextBox1.Text != "" && TextBox1IsNumber)
+            {
+                num1 = Convert.ToInt32(TextBox1.Text);
+            }
+            if (TextBox2.Text != "" && TextBox2IsNumber)
+            {
+                num2 = Convert.ToInt32(TextBox2.Text);
+            }
+            if (TBQuantity.Text != "" && TBQuantityIsNumber)
+            {
+                quantity = Convert.ToInt32(TBQuantity.Text);
+            }
+
+            t = new Thread(() => RunAsync(TextBox1IsNumber, TBQuantityIsNumber, quantity));
+
+            // Если не указана нижняя граница, поток с стартует с 2.
+            if (TextBox2.Text == "")
+            {
+                outputTextBox.Text += "2 ";
+                quantity--;
+            }
+
+
             t.Start();
         }
 
@@ -30,7 +55,7 @@ namespace Number_Generator
 
         
 
-        public async void RunAsync()
+        public async void RunAsync(bool TextBox1IsNumber, bool TBQuantityIsNumber, int quantity)
         {
 
             try
@@ -38,49 +63,17 @@ namespace Number_Generator
 
                 await Dispatcher.InvokeAsync(async () =>
                 {
-                    bool TBQuantityIsNumber = Regex.IsMatch(TBQuantity.Text, @"^\d+$");
-                    bool TextBox1IsNumber = Regex.IsMatch(TextBox1.Text, @"^-?\d+$"); 
-                    bool TextBox2IsNumber = Regex.IsMatch(TextBox2.Text, @"^-?\d+$");
-
-
-                    if (TextBox1.Text != "" && TextBox1IsNumber)
+                    // Если не указана верхняя граница, генерирование происходит до завершения приложения. (Priority condition)
+                    if (!TextBox1IsNumber)
                     {
-                        num1 = Convert.ToInt32(TextBox1.Text);
-                    }
-                    if (TextBox2.Text != "" && TextBox2IsNumber)
-                    {
-                        num2 = Convert.ToInt32(TextBox2.Text);
-                    }
-                    if (TBQuantity.Text != "" && TBQuantityIsNumber)
-                    {
-                        quantity = Convert.ToInt32(TBQuantity.Text);
-                        UseQuantity = true;
-                    }
-
-                    // Если не указана нижняя граница, поток с стартует с 2.
-                    if (TextBox2.Text == "")
-                    {
-                        outputTextBox.Text += "2 ";
-                        quantity--;
-                    }
-
-
-                    // Если не указана верхняя граница, генерирование происходит до завершения приложения. 
-
-                    if (TextBox1.Text == "")
-                    {
-
-
                         for (int i = 0; i < quantity;)
                         {
 
                             outputTextBox.Text += $"{random.Next(num1, num2 + 1)} ";
                             await Task.Delay(500);
                         }
-
-
                     }
-                    else if (UseQuantity && TBQuantityIsNumber)
+                    else if (TBQuantityIsNumber) 
                     {
                         for (int i = 0; i < quantity; i++)
                         {
